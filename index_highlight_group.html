@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Load annotations -->
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+
+<script>
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", 1200)
+    .attr("height", 1200)
+  .append("g")
+    .attr("transform", "translate(50,50)");
+
+//Read the data
+d3.csv("https://flunky.github.io/cars2017.csv", function(data) {
+
+  // Add X axis
+  var x = d3.scaleLinear()
+    .domain([0, 150])
+    .range([0, 800]);
+  svg.append("g")
+    .attr("transform", "translate(0,800)")
+    .call(d3.axisBottom(x).tickValues([0,25,50,75,100,125,150]));
+
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, 150])
+    .range([800, 0]);
+  svg.append("g").attr("transform", "translate(0,0)")
+    .call(d3.axisLeft(y).tickValues([0,25,50,75,100,125,150]));
+
+  // create a list of makes
+  var makes = ["Audi", "BMW", "Cadillac", "Chevrolet", "Dodge", 
+               "Ford", "Jeep", "Lexus", "Mercedes-Benz", "Nissan"]
+
+  var data = data.filter(function(d,i){ return makes.indexOf(d.Make) >= 0 })
+
+  // create a color mapping
+  var color = d3.scaleOrdinal().domain(makes)
+  .range(["black", "deepskyblue", "red", "darkgreen", "maroon", 
+          "blue", "goldenrod", "blueviolet", "lime", "fuchsia"]);
+
+
+  // Highlight the make that is hovered
+  var highlight = function(d){
+
+    selected_make = d.Make
+
+    d3.selectAll(".dot")
+      .transition()
+      .duration(200)
+      .style("fill", "lightgrey")
+      .attr("r", 3)
+
+    d3.selectAll("." + selected_make)
+      .transition()
+      .duration(200)
+      .style("fill", function (d) { return color(selected_make) })
+      .attr("r", 7)
+  }
+
+  // Highlight the make that is hovered
+  var doNotHighlight = function(){
+    d3.selectAll(".dot")
+      .transition()
+      .duration(200)
+      .style("fill", "lightgrey")
+      .attr("r", 5)
+  }
+
+  // Add dots
+  svg.append('g')
+    .selectAll("dot")
+    .data(data)
+    .enter()
+    .append("circle")
+      .attr("class", function (d) { return "dot " + d.Make } )
+      .attr("cx", function (d) { return x(d.AverageCityMPG); } )
+      .attr("cy", function (d) { return y(d.AverageHighwayMPG); } )
+      .attr("r", 5)
+      .style("fill", function (d) { return color(d) } )
+    .on("mouseover", highlight)
+    .on("mouseleave", doNotHighlight )
+
+// Add one dot in the legend for each make
+svg.selectAll("mydots")
+  .data(makes)
+  .enter()
+  .append("circle")
+    .attr("cx", 910)
+    .attr("cy", function(d,i){ return 15 + i*20})
+    .attr("r", 5)
+    .style("fill", function(d){ return color(d)})
+
+// Add one dot in the legend for each make.
+svg.selectAll("mylabels")
+  .data(makes)
+  .enter()
+  .append("text")
+    .attr("x", 930)
+    .attr("y", function(d,i){ return 20 + i*20})
+    .style("fill", function(d){ return color(d)})
+    .text(function(d){ return d})
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+
+svg.append("text")      // title
+    .attr("x", 400)
+    .attr("y", 0)
+    .style("text-anchor", "middle")
+    .text("Fuel Efficiency - City vs. Highway");
+
+svg.append("text")      // X axis label
+        .attr("x", 400 )
+        .attr("y", 850 )
+        .style("text-anchor", "middle")
+        .text("City MPG");
+
+svg.append("text")      // Y axis label
+        .attr("transform", "rotate(-90)")
+        .attr("y", -50)
+        .attr("x", -400)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Highway MPG");
+
+svg.append("text")      // title
+    .attr("x", 600)
+    .attr("y", 460)
+    .style("text-anchor", "left")
+    .text("Hover over the chart to");
+
+svg.append("text")      // title
+    .attr("x", 600)
+    .attr("y", 480)
+    .style("text-anchor", "left")
+    .text("discover the city and highway");
+
+svg.append("text")      // title
+    .attr("x", 600)
+    .attr("y", 500)
+    .style("text-anchor", "left")
+    .text("MPG of different brands!");
+
+})
+
+</script>
+
+<a href="index_Ford.html">
+    <button>Prev Page</button>
+</a>

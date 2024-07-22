@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Load annotations -->
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+
+<script>
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", 1200)
+    .attr("height", 1200)
+  .append("g")
+    .attr("transform", "translate(50,50)");
+
+//Read the data
+d3.csv("https://flunky.github.io/cars2017.csv", function(data) {
+
+  // Add X axis
+  var x = d3.scaleLinear()
+    .domain([0, 150])
+    .range([0, 800]);
+  svg.append("g")
+    .attr("transform", "translate(0,800)")
+    .call(d3.axisBottom(x).tickValues([0,25,50,75,100,125,150]));
+
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, 150])
+    .range([800, 0]);
+  svg.append("g").attr("transform", "translate(0,0)")
+    .call(d3.axisLeft(y).tickValues([0,25,50,75,100,125,150]));
+
+  // create a list of makes
+  var makes = ["Ford"]
+
+  var data = data.filter(function(d,i){ return makes.indexOf(d.Make) >= 0 })
+
+  // create a color mapping
+  var color = d3.scaleOrdinal().domain(makes)
+  .range(["deepskyblue"]);
+
+  // Add dots
+  svg.append('g')
+    .selectAll("dot")
+    .data(data)
+    .enter()
+    .append("circle")
+      .attr("class", function (d) { return "dot " + d.Make } )
+      .attr("cx", function (d) { return x(d.AverageCityMPG); } )
+      .attr("cy", function (d) { return y(d.AverageHighwayMPG); } )
+      .attr("r", 5)
+      .style("fill", function (d) { return color(d) } )
+
+svg.append("text")      // title
+    .attr("x", 400)
+    .attr("y", 0)
+    .style("text-anchor", "middle")
+    .text("Fuel Efficiency - City vs. Highway");
+
+svg.append("text")      // X axis label
+        .attr("x", 400 )
+        .attr("y", 850 )
+        .style("text-anchor", "middle")
+        .text("City MPG");
+
+svg.append("text")      // Y axis label
+        .attr("transform", "rotate(-90)")
+        .attr("y", -50)
+        .attr("x", -400)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Highway MPG");
+
+})
+
+// Features of the annotation
+const annotations = [
+  {
+    note: {
+      label: "Here are the city and highway MPG of various Ford vehicles",
+      title: "Ford's fuel efficiency"
+    },
+    x: 150,
+    y: 650,
+    dy: 25,
+    dx: 100
+  }
+]
+
+// Add annotation to the chart
+const makeAnnotations = d3.annotation()
+  .annotations(annotations)
+svg.append("g")
+  .call(makeAnnotations)
+
+</script>
+
+<a href="index_BMW.html">
+    <button>Prev Page</button>
+</a>
+
+<a href="index_highlight_group.html">
+    <button>Next Page</button>
+</a>
